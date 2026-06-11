@@ -1,0 +1,7 @@
+{
+  "name": "rdk-studio",
+  "private": true,
+  "dependencies": {
+    "@vercel/edge": "^1.2.2"
+  }
+}
