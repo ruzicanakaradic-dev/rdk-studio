@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RDK Studio — Kreator vizuala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Lora:wght@400;500;600&family=Young+Serif&family=Marcellus&family=Cinzel:wght@400;600&family=Italiana&family=Outfit:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600&family=DM+Sans:wght@300;400;500&family=Montserrat:wght@300;400;500;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B1721;
+  --ink-2:#241E2C;
+  --ink-3:#2E2738;
+  --cream:#F5EDE0;
+  --cream-2:#FAF6F0;
+  --gold:#C9A96E;
+  --purple:#7B5EA7;
+  --purple-l:#C4B1D9;
+  --purple-d:#4A3566;
+  --muted:#8B8295;
+  --line:rgba(245,237,224,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--ink);
+  color:var(--cream);
+  font-family:'Outfit',sans-serif;
+  font-weight:300;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+/* ---------- TOP BAR ---------- */
+header{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 24px;
+  border-bottom:1px solid var(--line);
+  background:var(--ink-2);
+  flex-shrink:0;
+}
+.wordmark{font-family:'Italiana',serif;font-size:22px;letter-spacing:.14em;color:var(--cream)}
+.wordmark span{color:var(--gold)}
+.formats{display:flex;gap:8px;margin-left:4px}
+.fmt{
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  font-family:'Outfit',sans-serif;font-weight:400;font-size:12.5px;
+  padding:7px 13px;border-radius:999px;cursor:pointer;transition:.18s;
+  letter-spacing:.02em;
+}
+.fmt:hover{color:var(--cream);border-color:rgba(201,169,110,.5)}
+.fmt.active{background:var(--gold);color:#1B1721;border-color:var(--gold);font-weight:500}
+.spacer{flex:1}
+.btn{
+  border:1px solid var(--gold);background:transparent;color:var(--gold);
+  font-family:'Outfit',sans-serif;font-weight:500;font-size:13px;
+  padding:9px 16px;border-radius:6px;cursor:pointer;transition:.18s;letter-spacing:.03em;
+}
+.btn:hover{background:rgba(201,169,110,.12)}
+.btn.primary{background:var(--gold);color:#1B1721}
+.btn.primary:hover{background:#D9BC84}
+.btn.ghost{border-color:var(--line);color:var(--muted);font-weight:400}
+.btn.ghost:hover{color:var(--cream)}
+.btn.wide{width:100%}
+/* ---------- LAYOUT ---------- */
+.app{display:flex;flex:1;min-height:0}
+aside{
+  width:300px;flex-shrink:0;background:var(--ink-2);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 18px 60px;
+}
+aside::-webkit-scrollbar{width:6px}
+aside::-webkit-scrollbar-thumb{background:var(--ink-3);border-radius:3px}
+.sec{margin-bottom:26px}
+.sec h3{
+  font-family:'Outfit',sans-serif;font-weight:500;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:12px;
+}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.row .btn{flex:1;font-size:12px;padding:8px 10px}
+label.upload{
+  display:block;border:1px dashed rgba(201,169,110,.4);border-radius:8px;
+  padding:14px 12px;text-align:center;color:var(--muted);font-size:12.5px;
+  cursor:pointer;transition:.18s;line-height:1.5;
+}
+label.upload:hover{border-color:var(--gold);color:var(--cream)}
+label.upload strong{color:var(--cream);font-weight:500;display:block;font-size:13px}
+input[type=file]{display:none}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
+textarea,select,input[type=text]{
+  width:100%;background:var(--ink);border:1px solid var(--line);border-radius:6px;
+  color:var(--cream);font-family:'Outfit',sans-serif;font-weight:300;font-size:13px;
+  padding:8px 10px;outline:none;transition:.18s;resize:vertical;
+}
+textarea:focus,select:focus,input[type=text]:focus{border-color:rgba(201,169,110,.6)}
+textarea{min-height:64px;line-height:1.45}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23C9A96E' stroke-width='1.4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+select optgroup{background:var(--ink-2);color:var(--gold);font-style:normal}
+select option{background:var(--ink);color:var(--cream)}
+input[type=range]{width:100%;accent-color:var(--gold);height:22px}
+.swatches{display:flex;gap:7px;flex-wrap:wrap}
+.sw{
+  width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:.15s;position:relative;
+}
+.sw:hover{transform:scale(1.12)}
+.sw.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--ink-2),0 0 0 3.5px var(--gold)}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{
+  flex:1;background:transparent;border:none;color:var(--muted);
+  font-family:'Outfit',sans-serif;font-size:11.5px;padding:7px 4px;cursor:pointer;transition:.15s;
+}
+.seg button.active{background:rgba(201,169,110,.18);color:var(--gold);font-weight:500}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.layer-list{display:flex;flex-direction:column;gap:5px}
+.layer-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:7px 10px;font-size:12px;cursor:pointer;transition:.15s;color:var(--muted);
+}
+.layer-item:hover{border-color:rgba(201,169,110,.4);color:var(--cream)}
+.layer-item.sel{border-color:var(--gold);color:var(--cream);background:rgba(201,169,110,.07)}
+.layer-item .tag{
+  font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);background:rgba(201,169,110,.12);padding:2px 6px;border-radius:3px;flex-shrink:0;
+}
+.layer-item .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layer-item .x{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;
+  padding:0 2px;line-height:1;transition:.15s;
+}
+.layer-item .x:hover{color:#E08585}
+/* video kontrole */
+.vidctrl{display:none;margin-top:10px;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
+.vidctrl .vrow{display:flex;align-items:center;gap:8px}
+.vidctrl button.play{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);
+  background:transparent;color:var(--gold);cursor:pointer;font-size:13px;flex-shrink:0;
+}
+.vidctrl button.play:hover{background:rgba(201,169,110,.12)}
+.vidctrl input[type=range]{flex:1}
+.vidctrl .t{font-size:11px;color:var(--muted);min-width:64px;text-align:right}
+/* magnific panel */
+.mgf{border:1px solid rgba(123,94,167,.45);border-radius:10px;padding:12px;background:rgba(74,53,102,.12)}
+.mgf .mgf-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.mgf .dot{width:8px;height:8px;border-radius:50%;background:var(--purple-l)}
+.mgf .mgf-title{font-size:12px;font-weight:500;letter-spacing:.06em;color:var(--purple-l)}
+/* ---------- STAGE ---------- */
+main{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;gap:18px;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(74,53,102,.25), transparent 55%),
+    radial-gradient(ellipse at 75% 85%, rgba(201,169,110,.07), transparent 50%),
+    var(--ink);
+}
+.stage-wrap{position:relative;box-shadow:0 24px 80px rgba(0,0,0,.55);line-height:0}
+canvas#stage{display:block;background:#fff;cursor:grab}
+canvas#stage.dragging{cursor:grabbing}
+.stage-label{
+  position:absolute;top:-28px;left:0;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;
+}
+.stage-label b{color:var(--gold);font-weight:500}
+/* ---------- SLIDE BAR ---------- */
+.slidebar{
+  display:flex;align-items:center;gap:8px;
+  background:var(--ink-2);border:1px solid var(--line);border-radius:12px;
+  padding:8px 12px;flex-shrink:0;
+}
+.slidebar .lbl{
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin-right:4px;font-weight:500;
+}
+.slide-chip{
+  width:38px;height:38px;border-radius:8px;border:1px solid var(--line);
+  background:var(--ink);color:var(--muted);cursor:pointer;transition:.15s;
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+}
+.slide-chip:hover{border-color:rgba(201,169,110,.5);color:var(--cream)}
+.slide-chip.active{background:var(--gold);color:#1B1721;border-color:var(--gold)}
+.slide-chip.add{font-size:18px;font-weight:300;border-style:dashed}
+.slidebar .div{width:1px;height:24px;background:var(--line);margin:0 4px}
+.mini{
+  background:transparent;border:none;color:var(--muted);cursor:pointer;
+  font-size:14px;padding:4px 7px;border-radius:6px;transition:.15s;
+  font-family:'Outfit',sans-serif;
+}
+.mini:hover{color:var(--gold);background:rgba(201,169,110,.1)}
+.mini.danger:hover{color:#E08585;background:rgba(224,133,133,.08)}
+/* toast */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink-3);border:1px solid var(--gold);color:var(--cream);
+  padding:11px 22px;border-radius:8px;font-size:13px;opacity:0;
+  transition:.3s;pointer-events:none;z-index:99;max-width:620px;text-align:center;line-height:1.5;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty-note{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:10px;pointer-events:none;color:#B7AEC4;text-align:center;padding:40px;
+}
+.empty-note .big{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#4A3566}
+.empty-note .small{font-size:13px;color:#9A8FAB;max-width:300px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">RDK <span>Studio</span></div>
+  <div class="formats">
+    <button class="fmt active" data-f="post">Post 1:1</button>
+    <button class="fmt" data-f="portrait">Portret 4:5</button>
+    <button class="fmt" data-f="story">Story / Reel 9:16</button>
+    <button class="fmt" data-f="tiktok">TikTok 9:16</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn ghost" id="toggleSafe">Sigurne zone</button>
+  <button class="btn ghost" id="ffmpegBtn" style="display:none">⌘ ffmpeg komanda</button>
+  <button class="btn" id="exportOverlay">Overlay (PNG)</button>
+  <button class="btn" id="exportFull">Izvezi slajd</button>
+  <button class="btn primary" id="exportAll">Izvezi sve (1)</button>
+</header>
+
+<div class="app">
+<aside>
+
+  <div class="sec">
+    <h3>Pozadina slajda</h3>
+    <label class="upload">
+      <strong>Fotografija ili video</strong>
+      JPG / PNG / MP4 / MOV / WebM<br>Magnific export ide ovde
+      <input type="file" id="bgInput" accept="image/*,video/mp4,video/quicktime,video/webm,.mov,.mp4,.webm,.avi">
+    </label>
+
+    <div class="vidctrl" id="vidCtrl">
+      <div class="vrow">
+        <button class="play" id="vidPlay" title="Pusti / pauziraj">▶</button>
+        <input type="range" id="vidScrub" min="0" max="1000" value="0">
+        <span class="t" id="vidTime">0:00 / 0:00</span>
+      </div>
+      <div class="hint">Pauziraj na frejmu na kom dizajniraš. Tekst i CTA ostaju preko celog videa — vidi „ffmpeg komanda" gore.</div>
+    </div>
+
+    <div class="field" style="margin-top:12px">
+      <label>Zum pozadine</label>
+      <input type="range" id="bgZoom" min="100" max="300" value="100">
+    </div>
+    <div class="field">
+      <label>Boja pozadine (bez slike / iza slike)</label>
+      <div class="swatches" id="bgSwatches"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>AI pozadina · Magnific</h3>
+    <div class="mgf">
+      <div class="mgf-head"><span class="dot"></span><span class="mgf-title">Prompt za generisanje</span></div>
+      <div class="field" style="margin-bottom:8px">
+        <textarea id="mgfPrompt" placeholder="Prompt će se sastaviti iz teksta na slajdu…"></textarea>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <button class="btn ghost" id="mgfBuild">Sastavi iz slajda</button>
+        <button class="btn ghost" id="mgfCopy">Kopiraj prompt</button>
+      </div>
+      <div class="row" style="margin-bottom:0;margin-top:8px">
+        <button class="btn wide primary" id="mgfClaude">✦ Zahtev za Claude (kopiraj)</button>
+      </div>
+      <div class="row" style="margin-bottom:0;margin-top:8px">
+        <button class="btn wide ghost" id="mgfOpen">ili otvori Magnific ručno ↗</button>
+      </div>
+      <div class="hint"><b style="color:var(--cream);font-weight:500">Tok:</b> „Sastavi iz slajda" → „Zahtev za Claude" → nalepi u chat (Claude generiše preko Magnific MCP-a) → preuzmi sliku → ubaci ovde kao pozadinu.</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Dodaj element</h3>
+    <div class="row">
+      <button class="btn ghost" id="addHeadline">Naslov</button>
+      <button class="btn ghost" id="addBody">Tekst</button>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="addCta">CTA dugme</button>
+      <button class="btn ghost" id="addPrice">Cena</button>
+    </div>
+    <div class="row">
+      <label class="upload" style="flex:1;padding:10px">
+        <strong style="font-size:12px">Logo (PNG)</strong>
+        <input type="file" id="logoInput" accept="image/png,image/svg+xml,image/webp">
+      </label>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Slojevi (slajd <span id="layerSlideNum">1</span>)</h3>
+    <div class="layer-list" id="layerList"></div>
+    <div class="hint" id="noLayersHint">Još nema dodatih elemenata.</div>
+  </div>
+
+  <div class="sec" id="propsSec" style="display:none">
+    <h3>Podešavanja sloja</h3>
+    <div id="propText" style="display:none">
+      <div class="field">
+        <label>Tekst</label>
+        <textarea id="pContent"></textarea>
+      </div>
+      <div class="field">
+        <label>Font</label>
+        <select id="pFont">
+          <optgroup label="Elegantni serif">
+            <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+            <option value="'Playfair Display', serif">Playfair Display</option>
+            <option value="'Lora', serif">Lora</option>
+            <option value="'Young Serif', serif">Young Serif (brend)</option>
+            <option value="'Marcellus', serif">Marcellus</option>
+          </optgroup>
+          <optgroup label="Display / naslovni">
+            <option value="'Italiana', serif">Italiana — tanki display</option>
+            <option value="'Cinzel', serif">Cinzel — kapitalni</option>
+          </optgroup>
+          <optgroup label="Čisti sans">
+            <option value="'Outfit', sans-serif">Outfit</option>
+            <option value="'Instrument Sans', sans-serif">Instrument Sans (brend)</option>
+            <option value="'DM Sans', sans-serif">DM Sans</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Nunito', sans-serif">Nunito</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:1">
+          <label>Veličina</label>
+          <input type="range" id="pSize" min="24" max="220" value="72">
+        </div>
+        <div class="field" style="flex:1">
+          <label>Debljina</label>
+          <select id="pWeight">
+            <option value="300">Light</option>
+            <option value="400">Regular</option>
+            <option value="500">Medium</option>
+            <option value="600" selected>SemiBold</option>
+            <option value="700">Bold</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Poravnanje</label>
+        <div class="seg" id="pAlign">
+          <button data-a="left">Levo</button>
+          <button data-a="center" class="active">Sredina</button>
+          <button data-a="right">Desno</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Boja teksta</label>
+        <div class="swatches" id="pColor"></div>
+      </div>
+      <div class="field">
+        <label>Senka / podloga za čitljivost</label>
+        <div class="seg" id="pBgMode">
+          <button data-m="none" class="active">Ništa</button>
+          <button data-m="shadow">Senka</button>
+          <button data-m="plate">Podloga</button>
+        </div>
+      </div>
+    </div>
+    <div id="propCta" style="display:none">
+      <div class="field">
+        <label>Tekst dugmeta</label>
+        <input type="text" id="cContent">
+      </div>
+      <div class="field">
+        <label>Brzi izbor</label>
+        <select id="cPreset">
+          <option value="">— izaberi —</option>
+          <option>Za porudžbine → DM</option>
+          <option>Poručite — link u bio ↑</option>
+          <option>Rezervišite svoj termin</option>
+          <option>Isporuka: Beograd i Novi Sad</option>
+          <option>Prevuci za cene →</option>
+          <option>Sačuvaj za sledeće slavlje 📌</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:1">
+          <label>Veličina</label>
+          <input type="range" id="cSize" min="28" max="90" value="44">
+        </div>
+      </div>
+      <div class="field">
+        <label>Stil</label>
+        <div class="seg" id="cStyle">
+          <button data-s="gold" class="active">Zlatno</button>
+          <button data-s="purple">Ljubičasto</button>
+          <button data-s="outline">Okvir</button>
+        </div>
+      </div>
+    </div>
+    <div id="propImg" style="display:none">
+      <div class="field">
+        <label>Veličina</label>
+        <input type="range" id="iScale" min="6" max="60" value="18">
+      </div>
+      <div class="field">
+        <label>Brza pozicija</label>
+        <div class="seg" id="iPos">
+          <button data-p="tl">↖</button>
+          <button data-p="tr">↗</button>
+          <button data-p="bl">↙</button>
+          <button data-p="br" class="active">↘</button>
+          <button data-p="c">•</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<main>
+  <div class="stage-wrap">
+    <div class="stage-label">Format: <b id="fmtLabel">Instagram Post · 1080 × 1080</b> &nbsp;·&nbsp; Slajd <b id="slideLabel">1 / 1</b></div>
+    <canvas id="stage" width="1080" height="1080"></canvas>
+    <div class="empty-note" id="emptyNote">
+      <div class="big">Ružini Domaći Kolači</div>
+      <div class="small">Dodaj fotografiju ili video sa leve strane, zatim naslov, cenu i CTA. Sve elemente pomeraš prevlačenjem.</div>
+    </div>
+  </div>
+
+  <div class="slidebar">
+    <span class="lbl">Carousel</span>
+    <div id="slideChips" style="display:flex;gap:6px;align-items:center"></div>
+    <button class="slide-chip add" id="addSlide" title="Dodaj prazan slajd">+</button>
+    <div class="div"></div>
+    <button class="mini" id="dupSlide" title="Dupliraj trenutni slajd">⧉ Dupliraj</button>
+    <button class="mini" id="moveL" title="Pomeri slajd levo">◀</button>
+    <button class="mini" id="moveR" title="Pomeri slajd desno">▶</button>
+    <button class="mini danger" id="delSlide" title="Obriši trenutni slajd">× Obriši</button>
+  </div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= PALETA ================= */
+const PALETTE = [
+  {n:'Krem', v:'#F5EDE0'},
+  {n:'Svetla krem', v:'#FAF6F0'},
+  {n:'Bela', v:'#FFFFFF'},
+  {n:'Zlato', v:'#C9A96E'},
+  {n:'Ljubičasta', v:'#7B5EA7'},
+  {n:'Lavanda', v:'#C4B1D9'},
+  {n:'Tamna ljubičasta', v:'#4A3566'},
+  {n:'Tamni tekst', v:'#2D2A33'},
+];
+
+const FORMATS = {
+  post:     {w:1080, h:1080, label:'Instagram Post · 1080 × 1080'},
+  portrait: {w:1080, h:1350, label:'Instagram Portret · 1080 × 1350'},
+  story:    {w:1080, h:1920, label:'Story / Reel · 1080 × 1920'},
+  tiktok:   {w:1080, h:1920, label:'TikTok · 1080 × 1920'},
+};
+
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+let fmt = 'post';
+let showSafe = false;
+let uid = 1;
+
+function newSlide(){
+  return { bg:{ img:null, video:null, videoName:'', zoom:1, ox:0, oy:0, color:'#F5EDE0' }, layers:[] };
+}
+const state = {
+  slides:[ newSlide() ],
+  cur:0,
+  sel:null,
+};
+function S(){ return state.slides[state.cur]; }
+function bgMedia(sl){ return sl.bg.video || sl.bg.img; }
+function mediaSize(m){
+  if(!m) return null;
+  if(m.videoWidth) return {w:m.videoWidth, h:m.videoHeight};
+  return {w:m.width, h:m.height};
+}
+
+/* ================= POMOĆNE ================= */
+function showToast(msg,long){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), long?5200:2600);
+}
+function getLayer(id){ return S().layers.find(l=>l.id===id); }
+function selLayer(){ return state.sel && state.sel!=='bg' ? getLayer(state.sel) : null; }
+
+/* ================= SWATCHES ================= */
+function buildSwatches(el, onPick, getCurrent){
+  el.innerHTML='';
+  PALETTE.forEach(c=>{
+    const s=document.createElement('div');
+    s.className='sw'; s.style.background=c.v; s.title=c.n;
+    if(c.v==='#FFFFFF'||c.v==='#FAF6F0') s.style.boxShadow='inset 0 0 0 1px rgba(0,0,0,.2)';
+    s.onclick=()=>{ onPick(c.v); refreshSwatch(el,getCurrent); render(); };
+    el.appendChild(s);
+  });
+  refreshSwatch(el,getCurrent);
+}
+function refreshSwatch(el,getCurrent){
+  const cur = getCurrent();
+  [...el.children].forEach((s,i)=> s.classList.toggle('sel', PALETTE[i].v===cur));
+}
+buildSwatches(document.getElementById('bgSwatches'),
+  v=>{ S().bg.color=v; }, ()=>S().bg.color);
+
+/* ================= FORMAT ================= */
+document.querySelectorAll('.fmt').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.fmt').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    fmt=b.dataset.f;
+    const F=FORMATS[fmt];
+    canvas.width=F.w; canvas.height=F.h;
+    document.getElementById('fmtLabel').textContent=F.label;
+    fitStage(); render();
+  };
+});
+function fitStage(){
+  const main=document.querySelector('main');
+  const pad=90;
+  const availW=main.clientWidth-pad, availH=main.clientHeight-pad-70;
+  const F=FORMATS[fmt];
+  const sc=Math.min(availW/F.w, availH/F.h, 0.6);
+  canvas.style.width=(F.w*sc)+'px';
+  canvas.style.height=(F.h*sc)+'px';
+}
+window.addEventListener('resize',()=>{fitStage();});
+
+/* ================= SLAJDOVI ================= */
+function refreshSlides(){
+  const chips=document.getElementById('slideChips');
+  chips.innerHTML='';
+  state.slides.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className='slide-chip'+(i===state.cur?' active':'');
+    b.textContent = s.bg.video ? (i+1)+'▸' : i+1;
+    b.title = s.bg.video ? 'Slajd sa videom' : 'Slajd '+(i+1);
+    b.onclick=()=>switchSlide(i);
+    chips.appendChild(b);
+  });
+  document.getElementById('slideLabel').textContent=`${state.cur+1} / ${state.slides.length}`;
+  document.getElementById('layerSlideNum').textContent=state.cur+1;
+  document.getElementById('exportAll').textContent=`Izvezi sve (${state.slides.length})`;
+}
+function pauseAllVideos(){
+  state.slides.forEach(s=>{ if(s.bg.video && !s.bg.video.paused) s.bg.video.pause(); });
+  syncPlayBtn();
+}
+function switchSlide(i){
+  pauseAllVideos();
+  state.cur=i; state.sel=null;
+  document.getElementById('bgZoom').value=Math.round(S().bg.zoom*100);
+  refreshSwatch(document.getElementById('bgSwatches'), ()=>S().bg.color);
+  refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();
+}
+document.getElementById('addSlide').onclick=()=>{
+  if(state.slides.length>=10){ showToast('Instagram carousel max je 10 slajdova.'); return; }
+  state.slides.splice(state.cur+1,0,newSlide());
+  switchSlide(state.cur+1);
+};
+document.getElementById('dupSlide').onclick=()=>{
+  if(state.slides.length>=10){ showToast('Instagram carousel max je 10 slajdova.'); return; }
+  const src=S();
+  const copy={
+    bg:{...src.bg},
+    layers: src.layers.map(l=>({...l, id:uid++, _box:null})),
+  };
+  state.slides.splice(state.cur+1,0,copy);
+  switchSlide(state.cur+1);
+  showToast('Slajd dupliran — izmeni tekst, zadrži raspored.');
+};
+document.getElementById('delSlide').onclick=()=>{
+  if(state.slides.length===1){ showToast('Mora postojati bar jedan slajd.'); return; }
+  state.slides.splice(state.cur,1);
+  switchSlide(Math.max(0,state.cur-1));
+};
+document.getElementById('moveL').onclick=()=>{
+  if(state.cur===0) return;
+  const s=state.slides.splice(state.cur,1)[0];
+  state.slides.splice(state.cur-1,0,s);
+  switchSlide(state.cur-1);
+};
+document.getElementById('moveR').onclick=()=>{
+  if(state.cur===state.slides.length-1) return;
+  const s=state.slides.splice(state.cur,1)[0];
+  state.slides.splice(state.cur+1,0,s);
+  switchSlide(state.cur+1);
+};
+
+/* ================= UČITAVANJE POZADINE (slika ili video) ================= */
+document.getElementById('bgInput').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const bg=S().bg;
+  const isVideo = f.type.startsWith('video') || /\.(mp4|mov|webm|avi)$/i.test(f.name);
+
+  if(isVideo){
+    if(/\.avi$/i.test(f.name)){
+      showToast('Firefox ne podržava AVI format. Konvertuj u MP4 (mogu ja preko ffmpeg-a) pa ubaci ponovo.', true);
+      e.target.value=''; return;
+    }
+    const v=document.createElement('video');
+    v.muted=true; v.playsInline=true; v.loop=true; v.preload='auto';
+    v.onloadeddata=()=>{
+      bg.video=v; bg.img=null; bg.videoName=f.name;
+      bg.zoom=1; bg.ox=0; bg.oy=0;
+      document.getElementById('bgZoom').value=100;
+      state.sel='bg';
+      v.currentTime=0.01;
+      refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();
+      showToast('Video učitan — pauziraj na frejmu, dizajniraj overlay, pa „ffmpeg komanda" za finalni video.', true);
+    };
+    v.onerror=()=>{
+      showToast('Ne mogu da pustim ovaj video (verovatno kodek). Konvertuj u MP4 H.264 pa probaj ponovo.', true);
+    };
+    v.onseeked=()=>render();
+    v.ontimeupdate=()=>syncScrub();
+    v.src=URL.createObjectURL(f);
+  } else {
+    const img=new Image();
+    img.onload=()=>{
+      bg.img=img; bg.video=null; bg.videoName='';
+      bg.zoom=1; bg.ox=0; bg.oy=0;
+      document.getElementById('bgZoom').value=100;
+      state.sel='bg';
+      refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();
+      showToast('Fotografija dodata — prevuci je na platnu da je pozicioniraš.');
+    };
+    img.src=URL.createObjectURL(f);
+  }
+  e.target.value='';
+};
+document.getElementById('bgZoom').oninput=e=>{ S().bg.zoom=e.target.value/100; render(); };
+
+/* ---- video kontrole ---- */
+function fmtTime(s){
+  if(!isFinite(s)) s=0;
+  const m=Math.floor(s/60), ss=Math.floor(s%60);
+  return `${m}:${String(ss).padStart(2,'0')}`;
+}
+function refreshVideoUI(){
+  const has=!!S().bg.video;
+  document.getElementById('vidCtrl').style.display=has?'block':'none';
+  document.getElementById('ffmpegBtn').style.display=has?'inline-block':'none';
+  syncPlayBtn(); syncScrub();
+}
+function syncPlayBtn(){
+  const v=S().bg.video;
+  document.getElementById('vidPlay').textContent=(v && !v.paused)?'❚❚':'▶';
+}
+function syncScrub(){
+  const v=S().bg.video; if(!v) return;
+  if(v.duration){
+    document.getElementById('vidScrub').value=Math.round(v.currentTime/v.duration*1000);
+    document.getElementById('vidTime').textContent=`${fmtTime(v.currentTime)} / ${fmtTime(v.duration)}`;
+  }
+}
+document.getElementById('vidPlay').onclick=()=>{
+  const v=S().bg.video; if(!v) return;
+  if(v.paused) v.play(); else v.pause();
+  syncPlayBtn();
+};
+document.getElementById('vidScrub').oninput=e=>{
+  const v=S().bg.video; if(!v||!v.duration) return;
+  v.currentTime=e.target.value/1000*v.duration;
+};
+/* render petlja dok video radi */
+(function tick(){
+  const v=S() && S().bg.video;
+  if(v && !v.paused) render();
+  requestAnimationFrame(tick);
+})();
+
+/* ---- ffmpeg komanda ---- */
+document.getElementById('ffmpegBtn').onclick=()=>{
+  const bg=S().bg; if(!bg.video) return;
+  const F=FORMATS[fmt];
+  const ovl=`rdk_${fmt}_overlay_${stamp()}.png`;
+  const src=bg.videoName||'VIDEO.mp4';
+  const cmd=`ffmpeg -i "${src}" -i "${ovl}" -filter_complex "[0:v]scale=${F.w}:${F.h}:force_original_aspect_ratio=increase,crop=${F.w}:${F.h}[bg];[bg][1:v]overlay=0:0:format=auto" -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -c:a copy "rdk_final_${stamp()}.mp4"`;
+  copyText(cmd);
+  showToast('ffmpeg komanda kopirana. Prvo izvezi overlay PNG, stavi ga pored videa, pa pokreni komandu — ili pošalji oba meni u chat.', true);
+};
+
+/* ================= LOGO ================= */
+document.getElementById('logoInput').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=()=>{
+    S().layers.push({id:uid++, type:'img', name:'Logo', img, scale:0.18, x:0.85, y:0.92});
+    state.sel=S().layers[S().layers.length-1].id;
+    refreshLayerList(); refreshProps(); render();
+  };
+  img.src=URL.createObjectURL(f);
+  e.target.value='';
+};
+
+/* ================= MAGNIFIC PANEL ================= */
+function mgfStyle(){
+  const vert = (fmt==='story'||fmt==='tiktok') ? 'vertical composition with the subject in the lower two thirds and the upper third softly blurred and uncluttered, leaving clean negative space for text overlay'
+    : fmt==='portrait' ? 'vertical 4:5 composition with clean negative space in the upper part for text overlay'
+    : 'square composition with clean negative space in the upper part for text overlay';
+  return `Professional food photography, premium homemade cakes and pastries, soft natural daylight from a window, warm cream and lavender-purple color palette (#F5EDE0, #C4B1D9), elegant minimal styling, shallow depth of field, close-up texture detail, appetizing, ${vert}, no text, no hands, no people`;
+}
+document.getElementById('mgfBuild').onclick=()=>{
+  const texts=S().layers.filter(l=>l.type==='text').map(l=>l.content.replace(/\n/g,' ')).join(', ');
+  const subject = texts ? `Subject: ${texts}. ` : '';
+  document.getElementById('mgfPrompt').value = subject + mgfStyle();
+  showToast(texts?'Prompt sastavljen iz teksta na slajdu.':'Nema teksta na slajdu — dodat je samo brend stil. Dopiši proizvod.');
+};
+document.getElementById('mgfCopy').onclick=()=>{
+  const p=document.getElementById('mgfPrompt').value.trim();
+  if(!p){ showToast('Prompt je prazan — prvo „Sastavi iz slajda".'); return; }
+  copyText(p); showToast('Prompt kopiran — nalepi ga u Magnific.');
+};
+document.getElementById('mgfClaude').onclick=()=>{
+  let p=document.getElementById('mgfPrompt').value.trim();
+  if(!p){
+    document.getElementById('mgfBuild').onclick();
+    p=document.getElementById('mgfPrompt').value.trim();
+  }
+  const ratio=(fmt==='story'||fmt==='tiktok')?'9:16': fmt==='portrait'?'4:5':'1:1';
+  const fName=FORMATS[fmt].label;
+  const msg=`Generiši mi preko Magnifica pozadinu za RDK Studio.\nFormat: ${fName} (aspect ratio ${ratio})\nBroj varijanti: 2\n\nPrompt:\n${p}`;
+  copyText(msg);
+  showToast('Zahtev kopiran — nalepi ga u chat sa Claude-om. Claude generiše preko Magnific MCP-a, ti preuzmeš i ubaciš ovde.', true);
+};
+document.getElementById('mgfOpen').onclick=()=>window.open('https://www.magnific.com','_blank');
+
+function copyText(t){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t));
+  } else fallbackCopy(t);
+}
+function fallbackCopy(t){
+  const ta=document.createElement('textarea');
+  ta.value=t; document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  ta.remove();
+}
+
+/* ================= DODAVANJE ELEMENATA ================= */
+function addText(kind){
+  const isH = kind==='headline';
+  S().layers.push({
+    id:uid++, type:'text', name: isH?'Naslov':'Tekst',
+    content: isH?'Sitni kolači':'od 2.200 RSD/kg · sveže, po porudžbini',
+    font: isH?"'Cormorant Garamond', serif":"'Outfit', sans-serif",
+    size: isH?110:46, weight: isH?'600':'400',
+    align:'center', color:'#F5EDE0', bgMode:'shadow',
+    x:0.5, y: isH?0.42:0.55,
+  });
+  state.sel=S().layers[S().layers.length-1].id;
+  refreshLayerList(); refreshProps(); render();
+}
+document.getElementById('addHeadline').onclick=()=>addText('headline');
+document.getElementById('addBody').onclick=()=>addText('body');
+
+document.getElementById('addCta').onclick=()=>{
+  S().layers.push({
+    id:uid++, type:'cta', name:'CTA',
+    content:'Za porudžbine → DM', size:44, style:'gold', x:0.5, y:0.82,
+  });
+  state.sel=S().layers[S().layers.length-1].id;
+  refreshLayerList(); refreshProps(); render();
+};
+document.getElementById('addPrice').onclick=()=>{
+  S().layers.push({
+    id:uid++, type:'cta', name:'Cena',
+    content:'od 2.200 RSD/kg', size:40, style:'outline', x:0.5, y:0.7,
+  });
+  state.sel=S().layers[S().layers.length-1].id;
+  refreshLayerList(); refreshProps(); render();
+};
+
+/* ================= LISTA SLOJEVA ================= */
+function refreshLayerList(){
+  const list=document.getElementById('layerList');
+  list.innerHTML='';
+  const hint=document.getElementById('noLayersHint');
+  hint.style.display = (S().layers.length||bgMedia(S()))?'none':'block';
+
+  if(bgMedia(S())){
+    const d=document.createElement('div');
+    d.className='layer-item'+(state.sel==='bg'?' sel':'');
+    const tag=S().bg.video?'VIDEO':'FOTO';
+    d.innerHTML=`<span class="tag">${tag}</span><span class="nm">Pozadina</span>`;
+    const x=document.createElement('button'); x.className='x'; x.textContent='×';
+    x.onclick=ev=>{ev.stopPropagation();
+      if(S().bg.video){S().bg.video.pause();}
+      S().bg.img=null; S().bg.video=null; S().bg.videoName='';
+      if(state.sel==='bg')state.sel=null;
+      refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();};
+    d.appendChild(x);
+    d.onclick=()=>{state.sel='bg'; refreshLayerList(); refreshProps();};
+    list.appendChild(d);
+  }
+  [...S().layers].reverse().forEach(l=>{
+    const d=document.createElement('div');
+    d.className='layer-item'+(state.sel===l.id?' sel':'');
+    const tag = l.type==='text'?'TXT': l.type==='cta'?'CTA':'IMG';
+    const nm = l.type==='img'? l.name : (l.content.split('\n')[0].slice(0,26)||l.name);
+    d.innerHTML=`<span class="tag">${tag}</span><span class="nm">${nm}</span>`;
+    const x=document.createElement('button'); x.className='x'; x.textContent='×';
+    x.onclick=ev=>{ev.stopPropagation(); S().layers=S().layers.filter(z=>z.id!==l.id); if(state.sel===l.id)state.sel=null; refreshLayerList(); refreshProps(); render();};
+    d.appendChild(x);
+    d.onclick=()=>{state.sel=l.id; refreshLayerList(); refreshProps();};
+    list.appendChild(d);
+  });
+}
+
+/* ================= PANEL PODEŠAVANJA ================= */
+const propsSec=document.getElementById('propsSec');
+const propText=document.getElementById('propText');
+const propCta=document.getElementById('propCta');
+const propImg=document.getElementById('propImg');
+
+function refreshProps(){
+  const l=selLayer();
+  propsSec.style.display = l?'block':'none';
+  propText.style.display = l&&l.type==='text'?'block':'none';
+  propCta.style.display  = l&&l.type==='cta'?'block':'none';
+  propImg.style.display  = l&&l.type==='img'?'block':'none';
+  if(!l) return;
+  if(l.type==='text'){
+    document.getElementById('pContent').value=l.content;
+    document.getElementById('pFont').value=l.font;
+    document.getElementById('pSize').value=l.size;
+    document.getElementById('pWeight').value=l.weight;
+    setSeg('pAlign','a',l.align);
+    setSeg('pBgMode','m',l.bgMode);
+    refreshSwatch(document.getElementById('pColor'), ()=>l.color);
+  } else if(l.type==='cta'){
+    document.getElementById('cContent').value=l.content;
+    document.getElementById('cSize').value=l.size;
+    setSeg('cStyle','s',l.style);
+  } else if(l.type==='img'){
+    document.getElementById('iScale').value=Math.round(l.scale*100);
+  }
+}
+function setSeg(id,attr,val){
+  document.querySelectorAll('#'+id+' button').forEach(b=>
+    b.classList.toggle('active', b.dataset[attr]===val));
+}
+buildSwatches(document.getElementById('pColor'),
+  v=>{const l=selLayer(); if(l) l.color=v;},
+  ()=>{const l=selLayer(); return l?l.color:null;});
+
+document.getElementById('pContent').oninput=e=>{const l=selLayer(); if(l){l.content=e.target.value; refreshLayerList(); render();}};
+document.getElementById('pFont').onchange=e=>{const l=selLayer(); if(l){l.font=e.target.value; render();}};
+document.getElementById('pSize').oninput=e=>{const l=selLayer(); if(l){l.size=+e.target.value; render();}};
+document.getElementById('pWeight').onchange=e=>{const l=selLayer(); if(l){l.weight=e.target.value; render();}};
+document.querySelectorAll('#pAlign button').forEach(b=>b.onclick=()=>{const l=selLayer(); if(l){l.align=b.dataset.a; setSeg('pAlign','a',l.align); render();}});
+document.querySelectorAll('#pBgMode button').forEach(b=>b.onclick=()=>{const l=selLayer(); if(l){l.bgMode=b.dataset.m; setSeg('pBgMode','m',l.bgMode); render();}});
+
+document.getElementById('cContent').oninput=e=>{const l=selLayer(); if(l){l.content=e.target.value; refreshLayerList(); render();}};
+document.getElementById('cPreset').onchange=e=>{const l=selLayer(); if(l&&e.target.value){l.content=e.target.value; document.getElementById('cContent').value=l.content; refreshLayerList(); render();} e.target.value='';};
+document.getElementById('cSize').oninput=e=>{const l=selLayer(); if(l){l.size=+e.target.value; render();}};
+document.querySelectorAll('#cStyle button').forEach(b=>b.onclick=()=>{const l=selLayer(); if(l){l.style=b.dataset.s; setSeg('cStyle','s',l.style); render();}});
+
+document.getElementById('iScale').oninput=e=>{const l=selLayer(); if(l){l.scale=e.target.value/100; render();}};
+document.querySelectorAll('#iPos button').forEach(b=>b.onclick=()=>{
+  const l=selLayer(); if(!l) return;
+  const m={tl:[0.12,0.08], tr:[0.88,0.08], bl:[0.12,0.92], br:[0.88,0.92], c:[0.5,0.5]};
+  [l.x,l.y]=m[b.dataset.p]; setSeg('iPos','p',b.dataset.p); render();
+});
+
+/* ================= RENDER ================= */
+function render(exportMode=false, overlayOnly=false, targetCtx=null, slide=null){
+  const c = targetCtx||ctx;
+  const sl = slide||S();
+  const W=canvas.width, H=canvas.height;
+  c.clearRect(0,0,W,H);
+
+  if(!overlayOnly){
+    c.fillStyle=sl.bg.color;
+    c.fillRect(0,0,W,H);
+    const m=bgMedia(sl);
+    if(m){
+      const ms=mediaSize(m);
+      const cover=Math.max(W/ms.w, H/ms.h)*sl.bg.zoom;
+      const dw=ms.w*cover, dh=ms.h*cover;
+      let dx=(W-dw)/2+sl.bg.ox, dy=(H-dh)/2+sl.bg.oy;
+      dx=Math.min(0,Math.max(W-dw,dx));
+      dy=Math.min(0,Math.max(H-dh,dy));
+      c.drawImage(m,dx,dy,dw,dh);
+    }
+  }
+
+  sl.layers.forEach(l=>{
+    if(l.type==='text') drawText(c,l,W,H);
+    else if(l.type==='cta') drawCta(c,l,W,H);
+    else if(l.type==='img') drawImg(c,l,W,H);
+  });
+
+  if(showSafe && !exportMode) drawSafeZones(c,W,H);
+
+  document.getElementById('emptyNote').style.display =
+    (!bgMedia(S()) && !S().layers.length)?'flex':'none';
+}
+
+function drawText(c,l,W,H){
+  const lines=l.content.split('\n');
+  const lh=l.size*1.22;
+  c.font=`${l.weight} ${l.size}px ${l.font}`;
+  c.textAlign=l.align; c.textBaseline='middle';
+  const cx=l.x*W, cy=l.y*H;
+  const totalH=lh*lines.length;
+  let maxW=0;
+  lines.forEach(t=>{maxW=Math.max(maxW,c.measureText(t).width);});
+  let bx = l.align==='center'?cx-maxW/2 : l.align==='left'?cx : cx-maxW;
+  l._box={x:bx-20, y:cy-totalH/2-14, w:maxW+40, h:totalH+28};
+
+  if(l.bgMode==='plate'){
+    c.save();
+    c.fillStyle='rgba(27,23,33,0.55)';
+    roundRect(c, l._box.x, l._box.y, l._box.w, l._box.h, 14); c.fill();
+    c.restore();
+  }
+  c.save();
+  if(l.bgMode==='shadow'){
+    c.shadowColor='rgba(0,0,0,0.45)';
+    c.shadowBlur=l.size*0.22; c.shadowOffsetY=2;
+  }
+  c.fillStyle=l.color;
+  lines.forEach((t,i)=>{
+    const y=cy-totalH/2+lh*(i+0.5);
+    c.fillText(t,cx,y);
+  });
+  c.restore();
+}
+
+function drawCta(c,l,W,H){
+  c.font=`500 ${l.size}px 'Outfit', sans-serif`;
+  const tw=c.measureText(l.content).width;
+  const padX=l.size*0.9, padY=l.size*0.52;
+  const bw=tw+padX*2, bh=l.size+padY*2;
+  const bx=l.x*W-bw/2, by=l.y*H-bh/2;
+  l._box={x:bx,y:by,w:bw,h:bh};
+  c.save();
+  c.shadowColor='rgba(0,0,0,0.3)'; c.shadowBlur=18; c.shadowOffsetY=4;
+  if(l.style==='gold'){ c.fillStyle='#C9A96E'; roundRect(c,bx,by,bw,bh,bh/2); c.fill(); c.shadowColor='transparent'; c.fillStyle='#2D2A33'; }
+  else if(l.style==='purple'){ c.fillStyle='#4A3566'; roundRect(c,bx,by,bw,bh,bh/2); c.fill(); c.shadowColor='transparent'; c.fillStyle='#F5EDE0'; }
+  else { c.shadowColor='transparent';
+         c.fillStyle='rgba(27,23,33,0.4)'; roundRect(c,bx,by,bw,bh,bh/2); c.fill();
+         c.strokeStyle='#C9A96E'; c.lineWidth=Math.max(2,l.size*0.07); roundRect(c,bx,by,bw,bh,bh/2); c.stroke();
+         c.fillStyle='#F5EDE0'; }
+  c.textAlign='center'; c.textBaseline='middle';
+  c.fillText(l.content, l.x*W, l.y*H + l.size*0.05);
+  c.restore();
+}
+
+function drawImg(c,l,W,H){
+  const img=l.img;
+  const dw=W*l.scale;
+  const dh=dw*(img.height/img.width);
+  const dx=l.x*W-dw/2, dy=l.y*H-dh/2;
+  l._box={x:dx,y:dy,w:dw,h:dh};
+  c.drawImage(img,dx,dy,dw,dh);
+}
+
+function roundRect(c,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+}
+
+function drawSafeZones(c,W,H){
+  c.save();
+  c.fillStyle='rgba(123,94,167,0.22)';
+  c.strokeStyle='rgba(196,177,217,0.85)';
+  c.setLineDash([14,10]); c.lineWidth=3;
+  if(fmt==='story'){
+    c.fillRect(0,0,W,250); c.fillRect(0,H-420,W,420); c.fillRect(W-130,250,130,H-670);
+    c.strokeRect(0,250,W-130,H-670);
+    zoneLabel(c,'UI zona — izbegavaj tekst',W/2,140);
+  } else if(fmt==='tiktok'){
+    c.fillRect(0,0,W,160); c.fillRect(0,H-480,W,480); c.fillRect(W-160,160,160,H-640);
+    c.strokeRect(0,160,W-160,H-640);
+    zoneLabel(c,'TikTok UI zona — izbegavaj tekst',W/2,100);
+  } else {
+    const m=60;
+    c.strokeRect(m,m,W-m*2,H-m*2);
+    zoneLabel(c,'Drži ključne elemente unutar okvira',W/2,m+44);
+  }
+  c.restore();
+}
+function zoneLabel(c,t,x,y){
+  c.setLineDash([]);
+  c.font="500 30px 'Outfit', sans-serif";
+  c.textAlign='center'; c.textBaseline='middle';
+  c.fillStyle='rgba(245,237,224,0.9)';
+  c.fillText(t,x,y);
+}
+
+document.getElementById('toggleSafe').onclick=function(){
+  showSafe=!showSafe;
+  this.style.color=showSafe?'#C9A96E':'';
+  this.style.borderColor=showSafe?'#C9A96E':'';
+  render();
+};
+
+/* ================= DRAG ================= */
+let drag=null;
+function canvasPoint(e){
+  const r=canvas.getBoundingClientRect();
+  return { x:(e.clientX-r.left)*(canvas.width/r.width),
+           y:(e.clientY-r.top)*(canvas.height/r.height) };
+}
+canvas.addEventListener('pointerdown',e=>{
+  const p=canvasPoint(e);
+  const layers=S().layers;
+  for(let i=layers.length-1;i>=0;i--){
+    const l=layers[i], b=l._box;
+    if(b && p.x>=b.x && p.x<=b.x+b.w && p.y>=b.y && p.y<=b.y+b.h){
+      state.sel=l.id; refreshLayerList(); refreshProps();
+      drag={type:'layer', l, sx:p.x, sy:p.y, ox:l.x, oy:l.y};
+      canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId);
+      return;
+    }
+  }
+  if(bgMedia(S())){
+    state.sel='bg'; refreshLayerList(); refreshProps();
+    drag={type:'bg', sx:p.x, sy:p.y, ox:S().bg.ox, oy:S().bg.oy};
+    canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId);
+  }
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const p=canvasPoint(e);
+  if(drag.type==='layer'){
+    drag.l.x=drag.ox+(p.x-drag.sx)/canvas.width;
+    drag.l.y=drag.oy+(p.y-drag.sy)/canvas.height;
+  } else {
+    S().bg.ox=drag.ox+(p.x-drag.sx);
+    S().bg.oy=drag.oy+(p.y-drag.sy);
+  }
+  render();
+});
+canvas.addEventListener('pointerup',()=>{drag=null; canvas.classList.remove('dragging');});
+
+/* ================= EXPORT ================= */
+function stamp(){
+  const d=new Date();
+  return `${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function renderToBlob(slide, overlayOnly){
+  return new Promise(res=>{
+    const off=document.createElement('canvas');
+    off.width=canvas.width; off.height=canvas.height;
+    render(true, overlayOnly, off.getContext('2d'), slide);
+    off.toBlob(res,'image/png');
+  });
+}
+function download(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+document.getElementById('exportFull').onclick=async()=>{
+  const b=await renderToBlob(S(),false);
+  const vid=S().bg.video?'_frejm':'';
+  const name=`rdk_${fmt}${vid}_slajd${state.cur+1}_${stamp()}.png`;
+  download(b,name);
+  showToast(S().bg.video
+    ? `Sačuvan trenutni frejm sa overlayem (${name}). Za ceo video koristi overlay + ffmpeg.`
+    : `Sačuvano: ${name} (${canvas.width}×${canvas.height}px)`, !!S().bg.video);
+  render();
+};
+document.getElementById('exportOverlay').onclick=async()=>{
+  const b=await renderToBlob(S(),true);
+  download(b,`rdk_${fmt}_overlay_${stamp()}.png`);
+  showToast('Overlay (providan PNG) — stavi ga preko videa ffmpeg komandom ili u IG/CapCut editoru.');
+  render();
+};
+document.getElementById('exportAll').onclick=async()=>{
+  const n=state.slides.length;
+  for(let i=0;i<n;i++){
+    const b=await renderToBlob(state.slides[i],false);
+    download(b,`rdk_carousel_${String(i+1).padStart(2,'0')}_${stamp()}.png`);
+    await new Promise(r=>setTimeout(r,350));
+  }
+  showToast(`Izvezeno ${n} slajdova — redosled u nazivu fajla (01, 02…).`);
+  render();
+};
+
+/* ================= START ================= */
+document.fonts.ready.then(()=>{ fitStage(); refreshSlides(); refreshLayerList(); refreshVideoUI(); render(); });
+fitStage(); refreshSlides(); refreshVideoUI(); render();
+</script>
+</body>
+</html>
