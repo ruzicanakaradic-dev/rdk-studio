@@ -28,6 +28,7 @@ body{
   font-family:'Outfit',sans-serif;
   font-weight:300;
   height:100vh;
+  height:100dvh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -158,7 +159,7 @@ main{
     var(--ink);
 }
 .stage-wrap{position:relative;box-shadow:0 24px 80px rgba(0,0,0,.55);line-height:0}
-canvas#stage{display:block;background:#fff;cursor:grab}
+canvas#stage{display:block;background:#fff;cursor:grab;touch-action:none}
 canvas#stage.dragging{cursor:grabbing}
 .stage-label{
   position:absolute;top:-28px;left:0;font-size:11px;letter-spacing:.12em;
@@ -206,6 +207,47 @@ canvas#stage.dragging{cursor:grabbing}
 }
 .empty-note .big{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#4A3566}
 .empty-note .small{font-size:13px;color:#9A8FAB;max-width:300px;line-height:1.5}
+/* ---------- MOBILNI LAYOUT ---------- */
+@media (max-width: 900px){
+  body{height:auto;min-height:100dvh;overflow:auto;overflow-x:hidden}
+  header{
+    flex-wrap:wrap;gap:8px;padding:10px 12px;
+    position:sticky;top:0;z-index:50;
+  }
+  .wordmark{font-size:17px}
+  .spacer{display:none}
+  header .btn{flex:1 1 auto;font-size:12px;padding:8px 10px;text-align:center}
+  .formats{
+    order:5;width:100%;margin-left:0;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .formats::-webkit-scrollbar{display:none}
+  .fmt{white-space:nowrap;flex-shrink:0}
+  .app{flex-direction:column;flex:none}
+  main{
+    order:1;min-height:0;padding:26px 12px 14px;
+    justify-content:flex-start;gap:14px;overflow:visible;
+  }
+  .stage-label{font-size:9.5px;top:-20px}
+  .stage-wrap{box-shadow:0 12px 40px rgba(0,0,0,.5)}
+  .slidebar{
+    max-width:calc(100vw - 24px);overflow-x:auto;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .slidebar::-webkit-scrollbar{display:none}
+  .slidebar .lbl{display:none}
+  .mini{white-space:nowrap}
+  aside{
+    order:2;width:100%;border-right:none;
+    border-top:1px solid var(--line);
+    padding:20px 16px 90px;overflow:visible;
+  }
+  .sw{width:32px;height:32px}
+  .seg button{padding:10px 4px}
+  textarea,select,input[type=text]{font-size:16px} /* sprečava iOS auto-zoom na fokus */
+  .toast{max-width:calc(100vw - 32px);bottom:16px}
+}
 </style>
 </head>
 <body>
@@ -529,14 +571,23 @@ document.querySelectorAll('.fmt').forEach(b=>{
 });
 function fitStage(){
   const main=document.querySelector('main');
-  const pad=90;
-  const availW=main.clientWidth-pad, availH=main.clientHeight-pad-70;
   const F=FORMATS[fmt];
+  const mobile = window.innerWidth <= 900;
+  let availW, availH;
+  if(mobile){
+    availW = window.innerWidth - 28;
+    availH = window.innerHeight * 0.55;
+  } else {
+    const pad=90;
+    availW = main.clientWidth-pad;
+    availH = main.clientHeight-pad-70;
+  }
   const sc=Math.min(availW/F.w, availH/F.h, 0.6);
   canvas.style.width=(F.w*sc)+'px';
   canvas.style.height=(F.h*sc)+'px';
 }
 window.addEventListener('resize',()=>{fitStage();});
+window.addEventListener('orientationchange',()=>{setTimeout(fitStage,250);});
 
 /* ================= SLAJDOVI ================= */
 function refreshSlides(){
