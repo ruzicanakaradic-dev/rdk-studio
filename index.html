@@ -28,7 +28,6 @@ body{
   font-family:'Outfit',sans-serif;
   font-weight:300;
   height:100vh;
-  height:100dvh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -109,6 +108,19 @@ input[type=range]{width:100%;accent-color:var(--gold);height:22px}
 }
 .sw:hover{transform:scale(1.12)}
 .sw.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--ink-2),0 0 0 3.5px var(--gold)}
+.sw-custom{
+  background:conic-gradient(from 0deg,#E08585,#E6C36B,#7FC79A,#6FA8D6,#9B7FBF,#E08585);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+}
+.sw-custom::after{
+  content:"+";position:absolute;color:#fff;font-size:14px;font-weight:600;
+  text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none;
+}
+.sw-custom input[type=color]{
+  opacity:0;position:absolute;inset:0;width:100%;height:100%;border:none;padding:0;cursor:pointer;
+}
+.prog-track{height:6px;background:var(--ink);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.prog-bar{height:100%;width:0;background:var(--gold);transition:width .2s}
 .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .seg button{
   flex:1;background:transparent;border:none;color:var(--muted);
@@ -159,7 +171,7 @@ main{
     var(--ink);
 }
 .stage-wrap{position:relative;box-shadow:0 24px 80px rgba(0,0,0,.55);line-height:0}
-canvas#stage{display:block;background:#fff;cursor:grab;touch-action:none}
+canvas#stage{display:block;background:#fff;cursor:grab}
 canvas#stage.dragging{cursor:grabbing}
 .stage-label{
   position:absolute;top:-28px;left:0;font-size:11px;letter-spacing:.12em;
@@ -207,47 +219,6 @@ canvas#stage.dragging{cursor:grabbing}
 }
 .empty-note .big{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#4A3566}
 .empty-note .small{font-size:13px;color:#9A8FAB;max-width:300px;line-height:1.5}
-/* ---------- MOBILNI LAYOUT ---------- */
-@media (max-width: 900px){
-  body{height:auto;min-height:100dvh;overflow:auto;overflow-x:hidden}
-  header{
-    flex-wrap:wrap;gap:8px;padding:10px 12px;
-    position:sticky;top:0;z-index:50;
-  }
-  .wordmark{font-size:17px}
-  .spacer{display:none}
-  header .btn{flex:1 1 auto;font-size:12px;padding:8px 10px;text-align:center}
-  .formats{
-    order:5;width:100%;margin-left:0;overflow-x:auto;
-    -webkit-overflow-scrolling:touch;padding-bottom:2px;
-    scrollbar-width:none;
-  }
-  .formats::-webkit-scrollbar{display:none}
-  .fmt{white-space:nowrap;flex-shrink:0}
-  .app{flex-direction:column;flex:none}
-  main{
-    order:1;min-height:0;padding:26px 12px 14px;
-    justify-content:flex-start;gap:14px;overflow:visible;
-  }
-  .stage-label{font-size:9.5px;top:-20px}
-  .stage-wrap{box-shadow:0 12px 40px rgba(0,0,0,.5)}
-  .slidebar{
-    max-width:calc(100vw - 24px);overflow-x:auto;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  }
-  .slidebar::-webkit-scrollbar{display:none}
-  .slidebar .lbl{display:none}
-  .mini{white-space:nowrap}
-  aside{
-    order:2;width:100%;border-right:none;
-    border-top:1px solid var(--line);
-    padding:20px 16px 90px;overflow:visible;
-  }
-  .sw{width:32px;height:32px}
-  .seg button{padding:10px 4px}
-  textarea,select,input[type=text]{font-size:16px} /* sprečava iOS auto-zoom na fokus */
-  .toast{max-width:calc(100vw - 32px);bottom:16px}
-}
 </style>
 </head>
 <body>
@@ -263,9 +234,10 @@ canvas#stage.dragging{cursor:grabbing}
   <div class="spacer"></div>
   <button class="btn ghost" id="toggleSafe">Sigurne zone</button>
   <button class="btn ghost" id="ffmpegBtn" style="display:none">⌘ ffmpeg komanda</button>
-  <button class="btn" id="exportOverlay">Overlay (PNG)</button>
+  <button class="btn ghost" id="exportOverlay">Overlay (PNG)</button>
   <button class="btn" id="exportFull">Izvezi slajd</button>
-  <button class="btn primary" id="exportAll">Izvezi sve (1)</button>
+  <button class="btn" id="exportAll">Slike (1)</button>
+  <button class="btn primary" id="exportReel">▸ Izvezi reel (MP4)</button>
 </header>
 
 <div class="app">
@@ -416,7 +388,7 @@ canvas#stage.dragging{cursor:grabbing}
         <input type="text" id="cContent">
       </div>
       <div class="field">
-        <label>Brzi izbor</label>
+        <label>Brzi izbor teksta</label>
         <select id="cPreset">
           <option value="">— izaberi —</option>
           <option>Za porudžbine → DM</option>
@@ -427,19 +399,32 @@ canvas#stage.dragging{cursor:grabbing}
           <option>Sačuvaj za sledeće slavlje 📌</option>
         </select>
       </div>
-      <div class="row">
-        <div class="field" style="flex:1">
-          <label>Veličina</label>
-          <input type="range" id="cSize" min="28" max="90" value="44">
+      <div class="field">
+        <label>Veličina</label>
+        <input type="range" id="cSize" min="28" max="90" value="44">
+      </div>
+      <div class="field">
+        <label>Brzi stil</label>
+        <div class="seg" id="cQuick">
+          <button data-q="gold" class="active">Zlatno</button>
+          <button data-q="purple">Ljubičasto</button>
+          <button data-q="outline">Okvir</button>
         </div>
       </div>
       <div class="field">
-        <label>Stil</label>
-        <div class="seg" id="cStyle">
-          <button data-s="gold" class="active">Zlatno</button>
-          <button data-s="purple">Ljubičasto</button>
-          <button data-s="outline">Okvir</button>
+        <label>Tip dugmeta</label>
+        <div class="seg" id="cFill">
+          <button data-fill="solid" class="active">Puno</button>
+          <button data-fill="outline">Samo okvir</button>
         </div>
+      </div>
+      <div class="field">
+        <label>Boja dugmeta / okvira</label>
+        <div class="swatches" id="cBg"></div>
+      </div>
+      <div class="field">
+        <label>Boja teksta</label>
+        <div class="swatches" id="cText"></div>
       </div>
     </div>
     <div id="propImg" style="display:none">
@@ -458,6 +443,29 @@ canvas#stage.dragging{cursor:grabbing}
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="sec" id="reelSec">
+    <h3>Reel · video izvoz</h3>
+    <div class="hint" id="reelInfo" style="margin-top:0;margin-bottom:12px"></div>
+    <div class="field">
+      <label>Trajanje ovog slajda · <span id="durNum" style="color:var(--cream)">3.0s</span></label>
+      <input type="range" id="slideDur" min="5" max="150" value="30">
+      <div class="hint" id="durHint"></div>
+    </div>
+    <div class="field">
+      <label>Broj sličica u sekundi (FPS)</label>
+      <div class="seg" id="reelFps">
+        <button data-fps="24">24</button>
+        <button data-fps="30" class="active">30</button>
+      </div>
+    </div>
+    <button class="btn primary wide" id="exportReel2" style="margin-top:4px">▸ Izvezi reel (MP4)</button>
+    <div id="reelProg" style="display:none;margin-top:12px">
+      <div class="prog-track"><div class="prog-bar" id="reelBar"></div></div>
+      <div class="hint" id="reelStatus" style="margin-top:7px;color:var(--cream)"></div>
+    </div>
+    <div class="hint" style="margin-top:12px">Izlaz je <b style="color:var(--cream);font-weight:500">MP4 bez zvuka</b> — muziku dodaješ u Instagram/TikTok aplikaciji. Spaja sve slajdove redom u jedan video. Prvi izvoz učitava enkoder (~par sekundi).</div>
   </div>
 
 </aside>
@@ -514,7 +522,7 @@ let showSafe = false;
 let uid = 1;
 
 function newSlide(){
-  return { bg:{ img:null, video:null, videoName:'', zoom:1, ox:0, oy:0, color:'#F5EDE0' }, layers:[] };
+  return { bg:{ img:null, video:null, videoName:'', zoom:1, ox:0, oy:0, color:'#F5EDE0' }, layers:[], durationSec:3 };
 }
 const state = {
   slides:[ newSlide() ],
@@ -557,6 +565,44 @@ function refreshSwatch(el,getCurrent){
 buildSwatches(document.getElementById('bgSwatches'),
   v=>{ S().bg.color=v; }, ()=>S().bg.color);
 
+/* ---- napredna kontrola boje: brend swatch-evi + prilagođeni picker ---- */
+function normalizeHex(v){
+  if(!v) return '#000000';
+  v=v.trim();
+  if(/^#[0-9a-fA-F]{6}$/.test(v)) return v.toLowerCase();
+  if(/^#[0-9a-fA-F]{3}$/.test(v)) return ('#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3]).toLowerCase();
+  return '#000000';
+}
+function buildColorControl(el, getCurrent, onPick){
+  el.innerHTML=''; el.classList.add('swatches');
+  PALETTE.forEach(c=>{
+    const s=document.createElement('div');
+    s.className='sw'; s.style.background=c.v; s.title=c.n; s.dataset.v=c.v.toUpperCase();
+    if(c.v==='#FFFFFF'||c.v==='#FAF6F0') s.style.boxShadow='inset 0 0 0 1px rgba(0,0,0,.2)';
+    s.onclick=()=>{ onPick(c.v); markColor(el,getCurrent); render(); };
+    el.appendChild(s);
+  });
+  const wrap=document.createElement('label');
+  wrap.className='sw sw-custom'; wrap.title='Prilagođena boja';
+  const inp=document.createElement('input'); inp.type='color'; inp.value='#7b5ea7';
+  inp.oninput=e=>{ onPick(e.target.value); markColor(el,getCurrent); render(); };
+  wrap.appendChild(inp); el.appendChild(wrap); el._customInput=inp;
+  markColor(el,getCurrent);
+}
+function markColor(el,getCurrent){
+  const cur=(getCurrent()||'').toUpperCase();
+  let matched=false;
+  el.querySelectorAll('.sw').forEach(s=>{
+    if(s.classList.contains('sw-custom')) return;
+    const on = s.dataset.v===cur; s.classList.toggle('sel',on); if(on) matched=true;
+  });
+  const custom=el.querySelector('.sw-custom');
+  if(custom){
+    custom.classList.toggle('sel', !matched && !!cur);
+    if(el._customInput && cur) el._customInput.value=normalizeHex(cur);
+  }
+}
+
 /* ================= FORMAT ================= */
 document.querySelectorAll('.fmt').forEach(b=>{
   b.onclick=()=>{
@@ -571,23 +617,14 @@ document.querySelectorAll('.fmt').forEach(b=>{
 });
 function fitStage(){
   const main=document.querySelector('main');
+  const pad=90;
+  const availW=main.clientWidth-pad, availH=main.clientHeight-pad-70;
   const F=FORMATS[fmt];
-  const mobile = window.innerWidth <= 900;
-  let availW, availH;
-  if(mobile){
-    availW = window.innerWidth - 28;
-    availH = window.innerHeight * 0.55;
-  } else {
-    const pad=90;
-    availW = main.clientWidth-pad;
-    availH = main.clientHeight-pad-70;
-  }
   const sc=Math.min(availW/F.w, availH/F.h, 0.6);
   canvas.style.width=(F.w*sc)+'px';
   canvas.style.height=(F.h*sc)+'px';
 }
 window.addEventListener('resize',()=>{fitStage();});
-window.addEventListener('orientationchange',()=>{setTimeout(fitStage,250);});
 
 /* ================= SLAJDOVI ================= */
 function refreshSlides(){
@@ -614,7 +651,7 @@ function switchSlide(i){
   state.cur=i; state.sel=null;
   document.getElementById('bgZoom').value=Math.round(S().bg.zoom*100);
   refreshSwatch(document.getElementById('bgSwatches'), ()=>S().bg.color);
-  refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();
+  refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); refreshReelUI(); render();
 }
 document.getElementById('addSlide').onclick=()=>{
   if(state.slides.length>=10){ showToast('Instagram carousel max je 10 slajdova.'); return; }
@@ -627,6 +664,7 @@ document.getElementById('dupSlide').onclick=()=>{
   const copy={
     bg:{...src.bg},
     layers: src.layers.map(l=>({...l, id:uid++, _box:null})),
+    durationSec: src.durationSec||3,
   };
   state.slides.splice(state.cur+1,0,copy);
   switchSlide(state.cur+1);
@@ -667,10 +705,13 @@ document.getElementById('bgInput').onchange=e=>{
       bg.video=v; bg.img=null; bg.videoName=f.name;
       bg.zoom=1; bg.ox=0; bg.oy=0;
       document.getElementById('bgZoom').value=100;
+      if(isFinite(v.duration) && v.duration>0){
+        S().durationSec = Math.min(15, Math.max(1, Math.round(v.duration*10)/10));
+      }
       state.sel='bg';
       v.currentTime=0.01;
-      refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); render();
-      showToast('Video učitan — pauziraj na frejmu, dizajniraj overlay, pa „ffmpeg komanda" za finalni video.', true);
+      refreshSlides(); refreshLayerList(); refreshProps(); refreshVideoUI(); refreshReelUI(); render();
+      showToast('Video učitan — dodaj tekst/cenu, podesi trajanje, pa „Izvezi reel (MP4)" za gotov video.', true);
     };
     v.onerror=()=>{
       showToast('Ne mogu da pustim ovaj video (verovatno kodek). Konvertuj u MP4 H.264 pa probaj ponovo.', true);
@@ -821,7 +862,9 @@ document.getElementById('addBody').onclick=()=>addText('body');
 document.getElementById('addCta').onclick=()=>{
   S().layers.push({
     id:uid++, type:'cta', name:'CTA',
-    content:'Za porudžbine → DM', size:44, style:'gold', x:0.5, y:0.82,
+    content:'Za porudžbine → DM', size:44,
+    fill:'solid', bgColor:'#C9A96E', textColor:'#2D2A33',
+    x:0.5, y:0.82,
   });
   state.sel=S().layers[S().layers.length-1].id;
   refreshLayerList(); refreshProps(); render();
@@ -829,7 +872,9 @@ document.getElementById('addCta').onclick=()=>{
 document.getElementById('addPrice').onclick=()=>{
   S().layers.push({
     id:uid++, type:'cta', name:'Cena',
-    content:'od 2.200 RSD/kg', size:40, style:'outline', x:0.5, y:0.7,
+    content:'od 2.200 RSD/kg', size:40,
+    fill:'outline', bgColor:'#C9A96E', textColor:'#F5EDE0',
+    x:0.5, y:0.7,
   });
   state.sel=S().layers[S().layers.length-1].id;
   refreshLayerList(); refreshProps(); render();
@@ -891,11 +936,18 @@ function refreshProps(){
     document.getElementById('pWeight').value=l.weight;
     setSeg('pAlign','a',l.align);
     setSeg('pBgMode','m',l.bgMode);
-    refreshSwatch(document.getElementById('pColor'), ()=>l.color);
+    markColor(document.getElementById('pColor'), ()=>l.color);
   } else if(l.type==='cta'){
+    if(l.fill===undefined){
+      if(l.style==='purple'){ l.fill='solid'; l.bgColor='#4A3566'; l.textColor='#F5EDE0'; }
+      else if(l.style==='outline'){ l.fill='outline'; l.bgColor='#C9A96E'; l.textColor='#F5EDE0'; }
+      else { l.fill='solid'; l.bgColor='#C9A96E'; l.textColor='#2D2A33'; }
+    }
     document.getElementById('cContent').value=l.content;
     document.getElementById('cSize').value=l.size;
-    setSeg('cStyle','s',l.style);
+    setSeg('cFill','fill',l.fill);
+    markColor(document.getElementById('cBg'), ()=>l.bgColor);
+    markColor(document.getElementById('cText'), ()=>l.textColor);
   } else if(l.type==='img'){
     document.getElementById('iScale').value=Math.round(l.scale*100);
   }
@@ -904,9 +956,15 @@ function setSeg(id,attr,val){
   document.querySelectorAll('#'+id+' button').forEach(b=>
     b.classList.toggle('active', b.dataset[attr]===val));
 }
-buildSwatches(document.getElementById('pColor'),
-  v=>{const l=selLayer(); if(l) l.color=v;},
-  ()=>{const l=selLayer(); return l?l.color:null;});
+buildColorControl(document.getElementById('pColor'),
+  ()=>{const l=selLayer(); return l?l.color:null;},
+  v=>{const l=selLayer(); if(l) l.color=v;});
+buildColorControl(document.getElementById('cBg'),
+  ()=>{const l=selLayer(); return l?l.bgColor:null;},
+  v=>{const l=selLayer(); if(l) l.bgColor=v;});
+buildColorControl(document.getElementById('cText'),
+  ()=>{const l=selLayer(); return l?l.textColor:null;},
+  v=>{const l=selLayer(); if(l) l.textColor=v;});
 
 document.getElementById('pContent').oninput=e=>{const l=selLayer(); if(l){l.content=e.target.value; refreshLayerList(); render();}};
 document.getElementById('pFont').onchange=e=>{const l=selLayer(); if(l){l.font=e.target.value; render();}};
@@ -918,7 +976,18 @@ document.querySelectorAll('#pBgMode button').forEach(b=>b.onclick=()=>{const l=s
 document.getElementById('cContent').oninput=e=>{const l=selLayer(); if(l){l.content=e.target.value; refreshLayerList(); render();}};
 document.getElementById('cPreset').onchange=e=>{const l=selLayer(); if(l&&e.target.value){l.content=e.target.value; document.getElementById('cContent').value=l.content; refreshLayerList(); render();} e.target.value='';};
 document.getElementById('cSize').oninput=e=>{const l=selLayer(); if(l){l.size=+e.target.value; render();}};
-document.querySelectorAll('#cStyle button').forEach(b=>b.onclick=()=>{const l=selLayer(); if(l){l.style=b.dataset.s; setSeg('cStyle','s',l.style); render();}});
+document.querySelectorAll('#cFill button').forEach(b=>b.onclick=()=>{const l=selLayer(); if(l){l.fill=b.dataset.fill; setSeg('cFill','fill',l.fill); render();}});
+const CTA_PRESETS={
+  gold:    {fill:'solid',   bgColor:'#C9A96E', textColor:'#2D2A33'},
+  purple:  {fill:'solid',   bgColor:'#4A3566', textColor:'#F5EDE0'},
+  outline: {fill:'outline', bgColor:'#C9A96E', textColor:'#F5EDE0'},
+};
+document.querySelectorAll('#cQuick button').forEach(b=>b.onclick=()=>{
+  const l=selLayer(); if(!l) return;
+  Object.assign(l, CTA_PRESETS[b.dataset.q]);
+  setSeg('cQuick','q',b.dataset.q);
+  refreshProps(); render();
+});
 
 document.getElementById('iScale').oninput=e=>{const l=selLayer(); if(l){l.scale=e.target.value/100; render();}};
 document.querySelectorAll('#iPos button').forEach(b=>b.onclick=()=>{
@@ -993,6 +1062,11 @@ function drawText(c,l,W,H){
 }
 
 function drawCta(c,l,W,H){
+  if(l.fill===undefined){
+    if(l.style==='purple'){ l.fill='solid'; l.bgColor='#4A3566'; l.textColor='#F5EDE0'; }
+    else if(l.style==='outline'){ l.fill='outline'; l.bgColor='#C9A96E'; l.textColor='#F5EDE0'; }
+    else { l.fill='solid'; l.bgColor='#C9A96E'; l.textColor='#2D2A33'; }
+  }
   c.font=`500 ${l.size}px 'Outfit', sans-serif`;
   const tw=c.measureText(l.content).width;
   const padX=l.size*0.9, padY=l.size*0.52;
@@ -1001,12 +1075,15 @@ function drawCta(c,l,W,H){
   l._box={x:bx,y:by,w:bw,h:bh};
   c.save();
   c.shadowColor='rgba(0,0,0,0.3)'; c.shadowBlur=18; c.shadowOffsetY=4;
-  if(l.style==='gold'){ c.fillStyle='#C9A96E'; roundRect(c,bx,by,bw,bh,bh/2); c.fill(); c.shadowColor='transparent'; c.fillStyle='#2D2A33'; }
-  else if(l.style==='purple'){ c.fillStyle='#4A3566'; roundRect(c,bx,by,bw,bh,bh/2); c.fill(); c.shadowColor='transparent'; c.fillStyle='#F5EDE0'; }
-  else { c.shadowColor='transparent';
-         c.fillStyle='rgba(27,23,33,0.4)'; roundRect(c,bx,by,bw,bh,bh/2); c.fill();
-         c.strokeStyle='#C9A96E'; c.lineWidth=Math.max(2,l.size*0.07); roundRect(c,bx,by,bw,bh,bh/2); c.stroke();
-         c.fillStyle='#F5EDE0'; }
+  if(l.fill==='outline'){
+    c.shadowColor='transparent';
+    c.fillStyle='rgba(27,23,33,0.40)'; roundRect(c,bx,by,bw,bh,bh/2); c.fill();
+    c.strokeStyle=l.bgColor; c.lineWidth=Math.max(2,l.size*0.07); roundRect(c,bx,by,bw,bh,bh/2); c.stroke();
+  } else {
+    c.fillStyle=l.bgColor; roundRect(c,bx,by,bw,bh,bh/2); c.fill();
+    c.shadowColor='transparent';
+  }
+  c.fillStyle=l.textColor;
   c.textAlign='center'; c.textBaseline='middle';
   c.fillText(l.content, l.x*W, l.y*H + l.size*0.05);
   c.restore();
@@ -1151,9 +1228,182 @@ document.getElementById('exportAll').onclick=async()=>{
   render();
 };
 
+/* ================= REEL · VIDEO IZVOZ (MP4) ================= */
+let reelFps=30;
+let reelBusy=false;
+let _ff=null, _ffLoading=null, _encHook=null;
+
+document.querySelectorAll('#reelFps button').forEach(b=>b.onclick=()=>{
+  reelFps=+b.dataset.fps; setSeg('reelFps','fps',String(reelFps));
+});
+document.getElementById('slideDur').oninput=e=>{
+  S().durationSec=Math.max(0.5,(+e.target.value)/10);
+  refreshReelUI();
+};
+function refreshReelUI(){
+  const sl=S();
+  if(sl.durationSec==null) sl.durationSec=3;
+  document.getElementById('slideDur').value=Math.round(sl.durationSec*10);
+  document.getElementById('durNum').textContent=sl.durationSec.toFixed(1)+'s';
+  document.getElementById('durHint').textContent = sl.bg.video
+    ? 'Slajd sa videom — uzima se klip do ovog trajanja (ako je kraći, ponavlja se).'
+    : 'Statičan slajd — koliko sekundi stoji na ekranu u reelu.';
+  const total=state.slides.reduce((a,s)=>a+(s.durationSec||3),0);
+  const nv=state.slides.filter(s=>s.bg.video).length;
+  document.getElementById('reelInfo').innerHTML=
+    `${state.slides.length} ${state.slides.length===1?'slajd':'slajda/-ova'} · ukupno ~${total.toFixed(1)}s`
+    + (nv?` · ${nv} sa videom`:'');
+}
+
+function setBar(p,txt){
+  document.getElementById('reelBar').style.width=Math.max(0,Math.min(100,p))+'%';
+  if(txt!=null) document.getElementById('reelStatus').textContent=txt;
+}
+function showReelProg(on){
+  document.getElementById('reelProg').style.display=on?'block':'none';
+  if(on) setBar(0,'');
+}
+function canvasBytes(cv,type,q){
+  return new Promise((res,rej)=>cv.toBlob(b=>{
+    if(!b){ rej(new Error('toBlob null')); return; }
+    b.arrayBuffer().then(ab=>res(new Uint8Array(ab)));
+  }, type, q));
+}
+function seekVideo(v,t){
+  return new Promise(res=>{
+    let done=false;
+    const fin=()=>{ if(done) return; done=true; v.removeEventListener('seeked',fin); res(); };
+    v.addEventListener('seeked',fin,{once:true});
+    try{ v.currentTime=Math.max(0,Math.min(t, (v.duration||t))); }catch(e){ fin(); }
+    setTimeout(fin,600);
+  });
+}
+async function loadFFmpeg(){
+  if(_ff) return _ff;
+  if(_ffLoading) return _ffLoading;
+  _ffLoading=(async()=>{
+    const base='https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+    const ffMod=await import('https://esm.sh/@ffmpeg/ffmpeg@0.12.10');
+    const utilMod=await import('https://esm.sh/@ffmpeg/util@0.12.1');
+    const FFmpeg=ffMod.FFmpeg;
+    const toBlobURL=utilMod.toBlobURL;
+    const inst=new FFmpeg();
+    inst.on('progress',({progress})=>{ if(_encHook && isFinite(progress)) _encHook(progress); });
+    await inst.load({
+      coreURL: await toBlobURL(`${base}/ffmpeg-core.js`,'text/javascript'),
+      wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`,'application/wasm'),
+    });
+    _ff=inst; return inst;
+  })();
+  return _ffLoading;
+}
+
+async function exportReelMP4(){
+  if(reelBusy) return;
+  const F=FORMATS[fmt], W=F.w, H=F.h, fps=reelFps;
+  const slides=state.slides;
+  slides.forEach(s=>{ if(s.durationSec==null) s.durationSec=3; });
+
+  reelBusy=true; showReelProg(true); setBar(2,'Pripremam…');
+  pauseAllVideos();
+
+  let ffmpeg;
+  try{
+    setBar(5,'Učitavam video enkoder…');
+    ffmpeg=await loadFFmpeg();
+  }catch(err){
+    console.error('ffmpeg load',err);
+    reelBusy=false; showReelProg(false);
+    showToast('Ne mogu da učitam video enkoder (mreža/CDN blokiran). Probaj ponovo ili koristi „ffmpeg komanda" dugme.',true);
+    return;
+  }
+
+  const ex=document.createElement('canvas'); ex.width=W; ex.height=H;
+  const exCtx=ex.getContext('2d');
+  const totalFrames=slides.reduce((a,s)=> a + (s.bg.video?Math.max(1,Math.round(s.durationSec*fps)):1), 0);
+  let doneFrames=0;
+  const segNames=[];
+
+  try{
+    setBar(15,'Pripremam sličice…');
+    for(let si=0; si<slides.length; si++){
+      const sl=slides[si];
+      const dur=Math.max(0.3, sl.durationSec||3);
+      const seg=`seg${si}.mp4`;
+
+      if(sl.bg.video){
+        const v=sl.bg.video;
+        const vd=(isFinite(v.duration)&&v.duration>0)?v.duration:dur;
+        const frames=Math.max(1, Math.round(dur*fps));
+        for(let n=0;n<frames;n++){
+          await seekVideo(v, vd>0 ? ((n/fps)%vd) : 0);
+          render(true,false,exCtx,sl);
+          const u8=await canvasBytes(ex,'image/jpeg',0.9);
+          await ffmpeg.writeFile(`f${String(n).padStart(4,'0')}.jpg`, u8);
+          doneFrames++;
+          if(n%3===0) setBar(15+doneFrames/totalFrames*58, `Sličica ${doneFrames}/${totalFrames}…`);
+          if(n%5===0) await new Promise(r=>setTimeout(r));
+        }
+        setBar(15+doneFrames/totalFrames*58, `Sklapam segment ${si+1}/${slides.length}…`);
+        _encHook=p=>setBar(73+(si/slides.length)*15 + p*(15/slides.length), null);
+        await ffmpeg.exec(['-framerate',String(fps),'-i','f%04d.jpg',
+          '-vf',`scale=${W}:${H},format=yuv420p`,'-r',String(fps),
+          '-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p',seg]);
+        _encHook=null;
+        for(let n=0;n<frames;n++){ try{ await ffmpeg.deleteFile(`f${String(n).padStart(4,'0')}.jpg`);}catch(e){} }
+      } else {
+        render(true,false,exCtx,sl);
+        const u8=await canvasBytes(ex,'image/jpeg',0.92);
+        const still=`still${si}.jpg`;
+        await ffmpeg.writeFile(still, u8);
+        doneFrames++;
+        setBar(15+doneFrames/totalFrames*58, `Sklapam segment ${si+1}/${slides.length}…`);
+        await ffmpeg.exec(['-loop','1','-t',String(dur),'-i',still,
+          '-vf',`scale=${W}:${H},format=yuv420p`,'-r',String(fps),
+          '-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p',seg]);
+        try{ await ffmpeg.deleteFile(still);}catch(e){}
+      }
+      segNames.push(seg);
+    }
+
+    let outName='out.mp4';
+    if(segNames.length===1){
+      outName=segNames[0];
+    } else {
+      setBar(92,'Spajam segmente u jedan video…');
+      const list=segNames.map(s=>`file '${s}'`).join('\n');
+      await ffmpeg.writeFile('list.txt', new TextEncoder().encode(list));
+      await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4']);
+    }
+
+    setBar(98,'Pakujem fajl…');
+    const data=await ffmpeg.readFile(outName);
+    const blob=new Blob([data.buffer||data],{type:'video/mp4'});
+
+    for(const s of segNames){ try{ await ffmpeg.deleteFile(s);}catch(e){} }
+    try{ await ffmpeg.deleteFile('list.txt'); }catch(e){}
+    try{ if(segNames.length>1) await ffmpeg.deleteFile('out.mp4'); }catch(e){}
+
+    setBar(100,'Gotovo ✓');
+    const name=`rdk_reel_${fmt}_${stamp()}.mp4`;
+    download(blob,name);
+    const mb=(blob.size/1024/1024).toFixed(1);
+    showToast(`Reel izvezen: ${name} (${mb} MB · ${W}×${H} · ${fps}fps · bez zvuka). Prevuci ga u Instagram ili TikTok i dodaj muziku.`,true);
+  }catch(err){
+    console.error('reel export',err);
+    showToast('Greška pri izradi videa. Skrati trajanje ili broj slajdova pa probaj ponovo. Alternativa: „ffmpeg komanda" dugme.',true);
+  }finally{
+    reelBusy=false; _encHook=null;
+    setTimeout(()=>showReelProg(false),1000);
+    render();
+  }
+}
+document.getElementById('exportReel').onclick=exportReelMP4;
+document.getElementById('exportReel2').onclick=exportReelMP4;
+
 /* ================= START ================= */
-document.fonts.ready.then(()=>{ fitStage(); refreshSlides(); refreshLayerList(); refreshVideoUI(); render(); });
-fitStage(); refreshSlides(); refreshVideoUI(); render();
+document.fonts.ready.then(()=>{ fitStage(); refreshSlides(); refreshLayerList(); refreshVideoUI(); refreshReelUI(); render(); });
+fitStage(); refreshSlides(); refreshVideoUI(); refreshReelUI(); render();
 </script>
 </body>
 </html>
